@@ -1,0 +1,15 @@
+﻿apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: azblob-storage
+  namespace: default
+spec:
+  type: bindings.azure.blobstorage
+  version: v1
+  metadata:
+    - name: accountName
+      value: "<accountname>"            # Your storage account name
+    - name: accountKey  
+      value : "<accountkey>"
+    - name: container
+      value: "<containername>"       # Your blob container name

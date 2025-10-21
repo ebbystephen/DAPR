@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "Dapr Blob Storage POC";
+}
+
+<h1>Dapr Blob Storage Operations</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <h2>Upload File</h2>
+        <form asp-controller="File" asp-action="UploadFile" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Select file:</label>
+                <input type="file" name="file" class="form-control" required />
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Upload via Dapr</button>
+        </form>
+        <hr />
+
+        @if (!string.IsNullOrEmpty(ViewBag.Message))
+        {
+            <div class="alert alert-info mt-3" role="alert">
+                @ViewBag.Message
+            </div>
+        }
+    </div>
+
+    <div class="col-md-6">
+        <h2>File Operations</h2>
+        <p>
+            Since the Dapr binding doesn't offer a direct "List Files" operation,
+            we'll hardcode file names for POC download/delete testing.
+        </p>
+
+        <form method="get" class="mb-3">
+            <div class="input-group">
+                <input type="text" id="fileNameInput" class="form-control" placeholder="Enter file name for action (e.g., mytestfile.txt)">
+                <button type="button" class="btn btn-success" onclick="downloadFile()">Download</button>
+                <button type="button" class="btn btn-danger" onclick="deleteFile()">Delete</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function downloadFile() {
+            const fileName = document.getElementById('fileNameInput').value.trim();
+            if (fileName) {
+                // Navigates the browser to the DownloadFile action in the controller
+                window.location.href = `/File/download/${fileName}`;
+            } else {
+                alert("Please enter a file name to download.");
+            }
+        }
+
+        function deleteFile() {
+            const fileName = document.getElementById('fileNameInput').value.trim();
+            if (fileName && confirm(`Are you sure you want to delete file: ${fileName}?`)) {
+                // Uses fetch/XHR to make a DELETE request to the controller
+                fetch(`/File/delete/${fileName}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert(`File '${fileName}' deleted successfully!`);
+                        // Optionally refresh or update the message
+                        window.location.reload();
+                    } else {
+                        response.text().then(text => alert(`Delete failed: ${text}`));
+                    }
+                })
+                .catch(error => {
+                    alert('An error occurred during delete operation.');
+                    console.error('Delete Error:', error);
+                });
+            } else if (fileName) {
+                // Do nothing if user cancels confirmation
+            } else {
+                alert("Please enter a file name to delete.");
+            }
+        }
+    </script>
+}
